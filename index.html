@@ -3,159 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Muse | Ultimate Edition</title>
+    <title>Daily Muse | Cloud</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;600&family=Dancing+Script:wght@600&family=Montserrat:wght@800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         :root {
-            --primary: #5C0029;
-            --secondary: #61304B;
-            --off-white: #F2F4F3;
-            --dark-black: #0A100D;
-            --bg: var(--dark-black);
-            --text: var(--off-white);
-            --glass: rgba(10, 16, 13, 0.9);
-            --card-gradient: linear-gradient(135deg, #5C0029, #61304B);
+            --primary: #5C0029; --secondary: #61304B; --off-white: #F2F4F3;
+            --dark-black: #0A100D; --bg: var(--dark-black); --text: var(--off-white);
+            --glass: rgba(10, 16, 13, 0.9); --card-gradient: linear-gradient(135deg, #5C0029, #61304B);
             --transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
-
-        body.light-mode {
-            --bg: var(--off-white);
-            --text: var(--dark-black);
-            --glass: rgba(242, 244, 243, 0.9);
-        }
-
-        /* Gradientes e Fontes */
+        body.light-mode { --bg: var(--off-white); --text: var(--dark-black); --glass: rgba(242, 244, 243, 0.9); }
+        
+        /* Estilos de Card */
         .grad-gold { --card-gradient: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728); color: #222 !important; }
         .grad-blue { --card-gradient: linear-gradient(135deg, #2193b0, #6dd5ed); }
         .grad-love { --card-gradient: linear-gradient(135deg, #ee0979, #ff6a00); }
         .grad-dark { --card-gradient: linear-gradient(135deg, #232526, #414345); }
-
         .font-modern { font-family: 'Montserrat', sans-serif !important; text-transform: uppercase; letter-spacing: -1px; }
         .font-elegant { font-family: 'Playfair Display', serif !important; }
         .font-cursive { font-family: 'Dancing Script', cursive !important; font-size: 2.8rem !important; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; transition: background 0.6s ease; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-            overflow-y: hidden; /* Começa travado para o Mood Modal */
-            transition: background 0.6s ease;
-        }
-
-        .dynamic-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
-            filter: blur(50px) brightness(0.3); z-index: -1;
-            transition: background-image 1.5s ease; transform: scale(1.1);
-        }
-
-        nav {
-            position: fixed; top: 0; width: 100%; padding: 15px 5%;
-            display: flex; justify-content: space-between; align-items: center;
-            backdrop-filter: blur(15px); background: var(--glass); z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
+        .dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(50px) brightness(0.3); z-index: -1; transition: background-image 1.5s ease; transform: scale(1.1); }
+        
+        nav { position: fixed; top: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(15px); background: var(--glass); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.3rem; }
 
-        /* Modal Mood */
-        #mood-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark-black); z-index: 3000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; transition: 0.8s; padding: 20px;
-        }
-
+        #mood-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark-black); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; transition: 0.8s; padding: 20px; }
         .mood-options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; width: 100%; max-width: 400px; }
-        .mood-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            color: white; padding: 20px; border-radius: 20px; cursor: pointer; transition: 0.3s;
-        }
-        .mood-btn:hover { background: var(--primary); transform: scale(1.05); }
+        .mood-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 20px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
 
-        /* Main Content */
-        main { 
-            display: flex; justify-content: center; align-items: flex-start; 
-            min-height: 100vh; padding: 120px 20px 60px 20px; 
-            overflow-y: auto;
-        }
-
+        main { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 120px 20px 60px 20px; }
         .content-wrapper { width: 100%; max-width: 450px; display: flex; flex-direction: column; align-items: center; }
 
-        .quote-card {
-            background: var(--card-gradient);
-            padding: 60px 40px; border-radius: 40px;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.6);
-            color: white; min-height: 420px; width: 100%;
-            display: flex; flex-direction: column; justify-content: center; text-align: center;
-            position: relative; transition: var(--transition);
-        }
+        .quote-card { background: var(--card-gradient); padding: 60px 40px; border-radius: 40px; box-shadow: 0 50px 100px rgba(0,0,0,0.6); color: white; min-height: 420px; width: 100%; display: flex; flex-direction: column; justify-content: center; text-align: center; transition: var(--transition); position: relative; }
         .quote-text { font-size: 2.2rem; line-height: 1.2; margin-bottom: 20px; }
         .quote-author { font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; opacity: 0.8; }
 
-        /* Design Panel */
         .design-panel { margin-top: 25px; width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center; }
         .color-dots { display: flex; gap: 12px; }
         .dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2.5px solid white; transition: 0.3s; }
 
-        /* Buttons */
         .actions { margin-top: 30px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; width: 100%; }
-        button {
-            background: var(--text); color: var(--bg);
-            border: none; padding: 14px 25px; border-radius: 50px;
-            cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s;
-        }
+        button { background: var(--text); color: var(--bg); border: none; padding: 14px 25px; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s; }
         .btn-outline { background: transparent; border: 1.5px solid var(--text); color: var(--text); }
         .btn-ia { background: linear-gradient(90deg, #8E2DE2, #4A00E0); color: white; }
 
-        /* Modais */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92); display: none; justify-content: center; align-items: center; z-index: 2000;
-            padding: 20px;
-        }
-        .modal-content {
-            background: var(--bg); width: 100%; max-width: 450px; padding: 30px; border-radius: 30px;
-            max-height: 90vh; overflow-y: auto;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+        .modal-content { background: var(--bg); width: 100%; max-width: 450px; padding: 30px; border-radius: 30px; }
 
-        .share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 25px 0; }
-        .share-option { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 0.7rem; }
-        .share-icon { width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; }
-
-        #toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: var(--primary); color: white; padding: 12px 30px; border-radius: 50px; opacity: 0; transition: 0.3s; z-index: 4000;
-        }
-
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 30px; border-radius: 50px; opacity: 0; transition: 0.3s; z-index: 4000; pointer-events: none; }
         .cursor { display: inline-block; width: 2px; background: white; margin-left: 4px; animation: blink 0.8s infinite; }
         @keyframes blink { 50% { opacity: 0; } }
-
-        /* Estilo input */
-        input, textarea, select { 
-            width: 100%; padding: 12px; margin-top: 5px; border-radius: 12px; 
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text);
-        }
-        .input-group { margin-bottom: 15px; }
-        label { font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; }
+        
+        input, textarea, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text); }
+        label { font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; margin-top: 10px; display: block; }
     </style>
 </head>
 <body>
 
     <div id="mood-modal">
-        <h1 style="font-family: 'Playfair Display'; font-size: 2.8rem; margin-bottom: 10px;">Daily Muse</h1>
-        <p style="opacity: 0.6; letter-spacing: 2px;">Como pulsa seu coração agora?</p>
+        <h1 style="font-family: 'Playfair Display'; font-size: 2.8rem;">Daily Muse</h1>
+        <p style="opacity: 0.6; letter-spacing: 2px;">Escolha seu Mood</p>
         <div class="mood-options">
-            <button class="mood-btn" onclick="selectMood('💪')">🔥<br>Cansado</button>
-            <button class="mood-btn" onclick="selectMood('🧘')">🌊<br>Ansioso</button>
-            <button class="mood-btn" onclick="selectMood('❤️')">✨<br>Feliz</button>
-            <button class="mood-btn" onclick="selectMood('all')">🎲<br>Aleatório</button>
+            <button class="mood-btn" onclick="selectMood('💪')">🔥<br>Força</button>
+            <button class="mood-btn" onclick="selectMood('🧘')">🌊<br>Zen</button>
+            <button class="mood-btn" onclick="selectMood('❤️')">✨<br>Amor</button>
+            <button class="mood-btn" onclick="selectMood('all')">🎲<br>Tudo</button>
         </div>
     </div>
 
@@ -173,28 +92,28 @@
     <main>
         <div class="content-wrapper">
             <div class="quote-card font-elegant" id="card-export">
-                <div class="quote-text" id="quote-display"></div>
+                <div class="quote-text" id="quote-display">Conectando...</div>
                 <div class="quote-author" id="author-display"></div>
-                <div style="display:none; margin-top:35px; font-family:'Montserrat'; font-size:0.6rem; letter-spacing: 3px;" id="card-logo">DAILY MUSE • MOMENTS</div>
+                <div style="display:none; margin-top:35px; font-family:'Montserrat'; font-size:0.6rem; letter-spacing: 3px;" id="card-logo">DAILY MUSE • SUPABASE</div>
             </div>
 
             <div class="design-panel">
                 <div class="color-dots">
                     <div class="dot" style="background: linear-gradient(135deg, #5C0029, #61304B);" onclick="changeStyle('default')"></div>
-                    <div class="dot" style="background: linear-gradient(135deg, #BF953F, #B38728);" onclick="changeStyle('grad-gold')"></div>
-                    <div class="dot" style="background: linear-gradient(135deg, #2193b0, #6dd5ed);" onclick="changeStyle('grad-blue')"></div>
-                    <div class="dot" style="background: linear-gradient(135deg, #ee0979, #ff6a00);" onclick="changeStyle('grad-love')"></div>
+                    <div class="dot" style="background: gold;" onclick="changeStyle('grad-gold')"></div>
+                    <div class="dot" style="background: #2193b0;" onclick="changeStyle('grad-blue')"></div>
+                    <div class="dot" style="background: #ee0979;" onclick="changeStyle('grad-love')"></div>
                     <div class="dot" style="background: #232526;" onclick="changeStyle('grad-dark')"></div>
                 </div>
-                <select style="width: auto; height: 40px;" onchange="changeFont(this.value)">
+                <select style="width: auto;" onchange="changeFont(this.value)">
                     <option value="font-elegant">Serifa Elegante</option>
                     <option value="font-modern">Minimalista Bold</option>
-                    <option value="font-cursive">Manuscrito Escrito</option>
+                    <option value="font-cursive">Manuscrito</option>
                 </select>
             </div>
 
             <div class="actions">
-                <button onclick="rollNew()">Nova Inspiração</button>
+                <button onclick="rollNew()">Nova Frase</button>
                 <button class="btn-ia" onclick="suggestIA()">Sugerir com IA ✨</button>
                 <button class="btn-outline" onclick="openShare()">Compartilhar</button>
             </div>
@@ -203,220 +122,165 @@
 
     <div class="modal-overlay" id="adminOverlay" onclick="closeModals(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 style="font-family:'Playfair Display'; margin-bottom:20px;">Personalizar</h2>
-            <div class="input-group">
-                <label>Frase</label>
-                <textarea id="in-text" rows="3" placeholder="Sua frase aqui..."></textarea>
-            </div>
-            <div class="input-group">
-                <label>Autor</label>
-                <input type="text" id="in-author" placeholder="Nome do autor">
-            </div>
-            <div class="input-group">
-                <label>Foto de Fundo</label>
-                <input type="file" id="in-file" accept="image/*">
-            </div>
-            <div class="input-group">
-                <label>Mood</label>
-                <select id="in-cat">
-                    <option value="🧘">Zen 🧘</option>
-                    <option value="💪">Força 💪</option>
-                    <option value="❤️">Amor ❤️</option>
-                </select>
-            </div>
-            <button onclick="saveQuote()" style="width:100%; margin-top: 10px;">Salvar no Banco Local</button>
-            
-            <div style="display:flex; gap:10px; margin-top:25px;">
-                <button onclick="exportBackup()" class="btn-outline" style="flex:1; font-size:0.7rem;">💾 Exportar</button>
-                <button onclick="document.getElementById('import-file').click()" class="btn-outline" style="flex:1; font-size:0.7rem;">📥 Importar</button>
-                <input type="file" id="import-file" style="display:none" onchange="importBackup(this)">
-            </div>
+            <h2 style="font-family:'Playfair Display';">Nova Frase Cloud</h2>
+            <label>Frase</label>
+            <textarea id="in-text" rows="3"></textarea>
+            <label>Autor</label>
+            <input type="text" id="in-author">
+            <label>Fundo (Opcional)</label>
+            <input type="file" id="in-file" accept="image/*">
+            <label>Mood</label>
+            <select id="in-cat">
+                <option value="🧘">Zen 🧘</option>
+                <option value="💪">Força 💪</option>
+                <option value="❤️">Amor ❤️</option>
+            </select>
+            <button id="btn-save" onclick="saveQuote()" style="width:100%; margin-top:15px;">Salvar na Nuvem</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="shareOverlay" onclick="closeModals(event)">
         <div class="modal-content" style="text-align:center;">
-            <h3 style="font-family:'Playfair Display';">Compartilhar</h3>
-            <div class="share-grid">
-                <div class="share-option" onclick="downloadCard()">
-                    <div class="share-icon">📸</div><span>Baixar Foto</span>
-                </div>
-                <div class="share-option" onclick="shareWA()">
-                    <div class="share-icon">💬</div><span>WhatsApp</span>
-                </div>
-                <div class="share-option" onclick="copyLink()">
-                    <div class="share-icon">🔗</div><span>Copiar Link</span>
-                </div>
+            <h3>Compartilhar</h3>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin: 25px 0;">
+                <div onclick="downloadCard()" style="cursor:pointer">📸<br><small>PNG</small></div>
+                <div onclick="shareWA()" style="cursor:pointer">💬<br><small>WhatsApp</small></div>
+                <div onclick="copyLink()" style="cursor:pointer">🔗<br><small>Link</small></div>
             </div>
             <button class="btn-outline" style="width:100%" onclick="closeModals(true)">Fechar</button>
         </div>
     </div>
 
-    <div id="toast">Pronto!</div>
+    <div id="toast"></div>
     <audio id="bg-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3"></audio>
 
     <script>
-        let quotes = JSON.parse(localStorage.getItem('muse_v7')) || [
-            { text: "A paciência é a forma mais refinada de coragem.", author: "Daily Muse", cat: "🧘", img: "" },
-            { text: "Grandes coisas nunca vêm de zonas de conforto.", author: "Autor Desconhecido", cat: "💪", img: "" }
-        ];
+        // --- CONFIGURAÇÃO SUPABASE ---
+        const SUPABASE_URL = "https://zviaklvvtfvdxwmghyig.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2aWFrbHZ2dGZ2ZHh3bWdoeWlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5Mjc3MDAsImV4cCI6MjA4NDUwMzcwMH0.FTCgEaHCboJkJK0y_FThAU0FpUROMz2CeslEXWKoFm4";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Estado Global
+        let quotes = [{ text: "O sucesso é ir de fracasso em fracasso sem perder o entusiasmo.", author: "Churchill", cat: "💪", img: "" }];
         let currentMood = 'all';
         let currentFont = 'font-elegant';
         let currentStyle = 'default';
 
-        // --- Mood Selection & Scroll Unlock ---
+        // Carregar Frases do Supabase
+        async function loadQuotes() {
+            const { data, error } = await _supabase.from('quotes').select('*');
+            if (data && data.length > 0) {
+                quotes = data.map(q => ({ text: q.text, author: q.author, cat: q.category, img: q.image_url }));
+            }
+            rollNew();
+        }
+
+        // Salvar Frase no Supabase
+        async function saveQuote() {
+            const text = document.getElementById('in-text').value;
+            const author = document.getElementById('in-author').value;
+            const category = document.getElementById('in-cat').value;
+            const file = document.getElementById('in-file').files[0];
+            const btn = document.getElementById('btn-save');
+
+            if (!text) return showToast("Escreva algo!");
+            btn.disabled = true;
+            showToast("Sincronizando...");
+
+            try {
+                let image_url = "";
+                if (file) {
+                    const fileName = `${Date.now()}_${file.name}`;
+                    const { data: upData, error: upErr } = await _supabase.storage.from('images').upload(fileName, file);
+                    if (upErr) throw upErr;
+                    const { data: pUrl } = _supabase.storage.from('images').getPublicUrl(fileName);
+                    image_url = pUrl.publicUrl;
+                }
+
+                await _supabase.from('quotes').insert([{ text, author, category, image_url }]);
+                showToast("Salvo para todos! ✨");
+                closeModals(true);
+                loadQuotes();
+            } catch (e) {
+                showToast("Erro ao salvar.");
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Lógica de Mood e Troca
         function selectMood(cat) {
             currentMood = cat;
             document.getElementById('mood-modal').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('mood-modal').style.display = 'none';
-                document.body.style.overflowY = 'auto'; // Libera o Scroll
-                rollNew();
+                loadQuotes();
             }, 800);
         }
 
-        // --- AI Suggestion Engine ---
-        const aiPhrases = {
-            "💪": ["Sua determinação hoje define quem você será amanhã.", "O impossível é apenas uma opinião.", "Vença a si mesmo e vencerá o mundo."],
-            "🧘": ["O silêncio é a voz da alma.", "Sua calma é seu superpoder.", "Deixe ir o que não te serve mais."],
-            "❤️": ["Onde existe amor, não há medo.", "Semeie luz por onde passar.", "Você é o milagre que tanto busca."]
-        };
-
-        function suggestIA() {
-            showToast("IA gerando inspiração...");
-            setTimeout(() => {
-                const pool = currentMood === 'all' ? [...aiPhrases["💪"], ...aiPhrases["🧘"], ...aiPhrases["❤️"]] : aiPhrases[currentMood];
-                const phrase = pool[Math.floor(Math.random() * pool.length)];
-                display({ text: phrase, author: "Daily Muse AI ✨", cat: currentMood, img: "" });
-            }, 1200);
-        }
-
-        // --- Visual Functions ---
-        function changeStyle(style) {
-            currentStyle = style;
-            updateCardClass();
-        }
-
-        function changeFont(font) {
-            currentFont = font;
-            updateCardClass();
-        }
-
-        function updateCardClass() {
-            const card = document.getElementById('card-export');
-            card.className = `quote-card ${currentStyle === 'default' ? '' : currentStyle} ${currentFont}`;
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            showToast("Tema alterado");
-        }
-
-        function typeWriter(text, i, fnCallback) {
-            const el = document.getElementById("quote-display");
-            if (i < text.length) {
-                el.innerHTML = text.substring(0, i+1) + '<span class="cursor"></span>';
-                setTimeout(() => typeWriter(text, i + 1, fnCallback), 35);
-            } else if (fnCallback) fnCallback();
+        function rollNew() {
+            const pool = currentMood === 'all' ? quotes : quotes.filter(q => q.cat === currentMood);
+            const item = pool[Math.floor(Math.random() * pool.length)] || quotes[0];
+            display(item);
         }
 
         function display(obj) {
-            const bgEl = document.getElementById('dynamic-bg');
+            const quoteEl = document.getElementById("quote-display");
             const authorEl = document.getElementById('author-display');
+            const bgEl = document.getElementById('dynamic-bg');
+            
             bgEl.style.backgroundImage = obj.img ? `url('${obj.img}')` : 'none';
             authorEl.style.opacity = 0;
-            typeWriter(`"${obj.text}"`, 0, () => {
-                authorEl.innerText = `— ${obj.author || 'Anônimo'}`;
-                authorEl.style.opacity = 0.8;
-            });
+            
+            let text = `"${obj.text}"`;
+            let i = 0;
+            quoteEl.innerHTML = "";
+            const timer = setInterval(() => {
+                if(i < text.length) {
+                    quoteEl.innerHTML = text.substring(0, i+1) + '<span class="cursor"></span>';
+                    i++;
+                } else {
+                    clearInterval(timer);
+                    authorEl.innerText = `— ${obj.author || 'Anônimo'}`;
+                    authorEl.style.opacity = 0.8;
+                }
+            }, 30);
         }
 
-        function rollNew() {
-            const filtered = currentMood === 'all' ? quotes : quotes.filter(q => q.cat === currentMood);
-            const pool = filtered.length > 0 ? filtered : quotes;
-            display(pool[Math.floor(Math.random() * pool.length)]);
+        // IA Simbolizada
+        function suggestIA() {
+            const aiPhrases = ["A jornada é o prêmio.", "Seja gentil consigo mesmo hoje.", "Grandes coisas levam tempo.", "Respire fundo e recomece."];
+            showToast("IA gerando...");
+            setTimeout(() => {
+                display({ text: aiPhrases[Math.floor(Math.random() * aiPhrases.length)], author: "Daily IA ✨", img: "" });
+            }, 1000);
         }
 
-        // --- Actions & Share ---
-        function copyLink() {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                showToast("Link copiado!");
-                closeModals(true);
-            });
+        // UI Helpers
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
+        function toggleMusic() { 
+            const a = document.getElementById('bg-music');
+            a.paused ? a.play() : a.pause();
+            showToast(a.paused ? "Música off" : "Música on 🎵");
         }
-
-        async function downloadCard() {
+        function changeStyle(s) { currentStyle = s; updateCardClass(); }
+        function changeFont(f) { currentFont = f; updateCardClass(); }
+        function updateCardClass() { document.getElementById('card-export').className = `quote-card ${currentStyle} ${currentFont}`; }
+        function openAdmin() { document.getElementById('adminOverlay').style.display = 'flex'; }
+        function openShare() { document.getElementById('shareOverlay').style.display = 'flex'; }
+        function closeModals(e) { if(e === true || e.target.classList.contains('modal-overlay')) document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+        function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 3000); }
+        function copyLink() { navigator.clipboard.writeText(window.location.href); showToast("Link copiado!"); }
+        function shareWA() { window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('quote-display').innerText)}`); }
+        async function downloadCard() { 
             const card = document.getElementById('card-export');
             const logo = document.getElementById('card-logo');
             logo.style.display = "block";
-            showToast("Criando imagem...");
-            html2canvas(card, { scale: 2, borderRadius: 40, backgroundColor: null }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `daily-muse-${Date.now()}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
-                logo.style.display = "none";
-                showToast("Galeria atualizada!");
-            });
-        }
-
-        function shareWA() {
-            const t = encodeURIComponent(document.getElementById('quote-display').innerText);
-            window.open(`https://wa.me/?text=${t}`);
-        }
-
-        // --- Admin ---
-        function saveQuote() {
-            const text = document.getElementById('in-text').value;
-            const author = document.getElementById('in-author').value;
-            const cat = document.getElementById('in-cat').value;
-            const file = document.getElementById('in-file').files[0];
-            if(!text) return showToast("Falta a frase!");
-
-            const onDone = (img) => {
-                quotes.push({ text, author, cat, img: img || "" });
-                localStorage.setItem('muse_v7', JSON.stringify(quotes));
-                showToast("Salvo com sucesso!");
-                closeModals(true);
-            };
-
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => onDone(e.target.result);
-                reader.readAsDataURL(file);
-            } else onDone();
-        }
-
-        // --- UI Utils ---
-        function openAdmin() { document.getElementById('adminOverlay').style.display = 'flex'; }
-        function openShare() { document.getElementById('shareOverlay').style.display = 'flex'; }
-        function closeModals(e) { 
-            if(e === true || e.target.classList.contains('modal-overlay')) {
-                document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-            }
-        }
-        function toggleMusic() {
-            const a = document.getElementById('bg-music');
-            a.paused ? a.play() : a.pause();
-            showToast(a.paused ? "Música em pausa" : "Música tocando 🎵");
-        }
-        function showToast(m) {
-            const t = document.getElementById('toast'); t.innerText = m; t.style.opacity = 1;
-            setTimeout(() => t.style.opacity = 0, 3000);
-        }
-        function exportBackup() {
-            const blob = new Blob([JSON.stringify(quotes)], {type: "application/json"});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "muse-backup.json"; a.click();
-        }
-        function importBackup(input) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                quotes = JSON.parse(e.target.result);
-                localStorage.setItem('muse_v7', JSON.stringify(quotes));
-                location.reload();
-            };
-            reader.readAsText(input.files[0]);
+            showToast("Gerando PNG...");
+            const canvas = await html2canvas(card, { scale: 2 });
+            const a = document.createElement('a'); a.download = 'daily-muse.png'; a.href = canvas.toDataURL(); a.click();
+            logo.style.display = "none";
         }
     </script>
 </body>
