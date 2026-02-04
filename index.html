@@ -13,7 +13,7 @@
             --primary: #5C0029; --secondary: #61304B; --off-white: #F2F4F3;
             --dark-black: #0A100D; --bg: var(--dark-black); --text: var(--off-white);
             --glass: rgba(10, 16, 13, 0.9); --card-gradient: linear-gradient(135deg, #5C0029, #61304B);
-            --transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            --transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
         body.light-mode { --bg: var(--off-white); --text: var(--dark-black); --glass: rgba(242, 244, 243, 0.9); }
         
@@ -29,23 +29,38 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; transition: background 0.6s ease; }
 
-        .dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(50px) brightness(0.3); z-index: -1; transition: background-image 1.5s ease; transform: scale(1.1); }
+        /* FUNDO DINÂMICO - O segredo do desfoque está aqui */
+        .dynamic-bg { 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background-size: cover; 
+            background-position: center; 
+            filter: blur(50px) brightness(0.4); 
+            z-index: -1; 
+            transition: var(--transition); 
+            transform: scale(1.1); 
+        }
         
-        nav { position: fixed; top: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(15px); background: var(--glass); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        /* MODO FOCO: Quando a classe 'focus-mode' estiver ativa no body */
+        body.focus-mode .dynamic-bg { filter: blur(0px) brightness(1); transform: scale(1); }
+        body.focus-mode main, body.focus-mode nav, body.focus-mode .design-panel { opacity: 0; pointer-events: none; transform: translateY(20px); }
+        
+        nav { position: fixed; top: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(15px); background: var(--glass); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05); transition: var(--transition); }
         .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.3rem; }
 
         #mood-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark-black); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; transition: 0.8s; padding: 20px; }
         .mood-options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; width: 100%; max-width: 400px; }
         .mood-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 20px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
 
-        main { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 120px 20px 60px 20px; }
+        main { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 120px 20px 60px 20px; transition: var(--transition); }
         .content-wrapper { width: 100%; max-width: 450px; display: flex; flex-direction: column; align-items: center; }
 
         .quote-card { background: var(--card-gradient); padding: 60px 40px; border-radius: 40px; box-shadow: 0 50px 100px rgba(0,0,0,0.6); color: white; min-height: 420px; width: 100%; display: flex; flex-direction: column; justify-content: center; text-align: center; transition: var(--transition); position: relative; }
         .quote-text { font-size: 2.2rem; line-height: 1.2; margin-bottom: 20px; }
         .quote-author { font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; opacity: 0.8; }
 
-        .design-panel { margin-top: 25px; width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .design-panel { margin-top: 25px; width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center; transition: var(--transition); }
         .color-dots { display: flex; gap: 12px; }
         .dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2.5px solid white; transition: 0.3s; }
 
@@ -53,14 +68,18 @@
         button { background: var(--text); color: var(--bg); border: none; padding: 14px 25px; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s; }
         .btn-outline { background: transparent; border: 1.5px solid var(--text); color: var(--text); }
         .btn-ia { background: linear-gradient(90deg, #8E2DE2, #4A00E0); color: white; }
+        .btn-focus { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
+
+        #btn-exit-focus { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 5000; display: none; background: white; color: black; padding: 15px 40px; border-radius: 50px; font-weight: bold; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        body.focus-mode #btn-exit-focus { display: block; animation: fadeInUp 0.5s ease; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translate(-50%, 40px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
         .modal-content { background: var(--bg); width: 100%; max-width: 450px; padding: 30px; border-radius: 30px; }
-
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 30px; border-radius: 50px; opacity: 0; transition: 0.3s; z-index: 4000; pointer-events: none; }
         .cursor { display: inline-block; width: 2px; background: white; margin-left: 4px; animation: blink 0.8s infinite; }
         @keyframes blink { 50% { opacity: 0; } }
-        
         input, textarea, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text); }
         label { font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; margin-top: 10px; display: block; }
     </style>
@@ -79,6 +98,7 @@
     </div>
 
     <div class="dynamic-bg" id="dynamic-bg"></div>
+    <button id="btn-exit-focus" onclick="toggleFocusMode()">✕ Voltar para a Frase</button>
 
     <nav>
         <div class="logo">Daily Muse</div>
@@ -114,7 +134,8 @@
 
             <div class="actions">
                 <button onclick="rollNew()">Nova Frase</button>
-                <button class="btn-ia" onclick="suggestIA()">Sugerir com IA ✨</button>
+                <button class="btn-focus" id="btn-focus-trigger" onclick="toggleFocusMode()">🖼️ Ver Arte</button>
+                <button class="btn-ia" onclick="suggestIA()">IA ✨</button>
                 <button class="btn-outline" onclick="openShare()">Compartilhar</button>
             </div>
         </div>
@@ -123,17 +144,12 @@
     <div class="modal-overlay" id="adminOverlay" onclick="closeModals(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 style="font-family:'Playfair Display';">Nova Frase Cloud</h2>
-            <label>Frase</label>
-            <textarea id="in-text" rows="3"></textarea>
-            <label>Autor</label>
-            <input type="text" id="in-author">
-            <label>Fundo (Opcional)</label>
-            <input type="file" id="in-file" accept="image/*">
+            <label>Frase</label><textarea id="in-text" rows="3"></textarea>
+            <label>Autor</label><input type="text" id="in-author">
+            <label>Fundo (Opcional)</label><input type="file" id="in-file" accept="image/*">
             <label>Mood</label>
             <select id="in-cat">
-                <option value="🧘">Zen 🧘</option>
-                <option value="💪">Força 💪</option>
-                <option value="❤️">Amor ❤️</option>
+                <option value="🧘">Zen 🧘</option><option value="💪">Força 💪</option><option value="❤️">Amor ❤️</option>
             </select>
             <button id="btn-save" onclick="saveQuote()" style="width:100%; margin-top:15px;">Salvar na Nuvem</button>
         </div>
@@ -155,86 +171,70 @@
     <audio id="bg-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3"></audio>
 
     <script>
-        // --- CONFIGURAÇÃO SUPABASE ---
         const SUPABASE_URL = "https://zviaklvvtfvdxwmghyig.supabase.co"; 
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2aWFrbHZ2dGZ2ZHh3bWdoeWlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5Mjc3MDAsImV4cCI6MjA4NDUwMzcwMH0.FTCgEaHCboJkJK0y_FThAU0FpUROMz2CeslEXWKoFm4";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Estado Global
         let quotes = [{ text: "O sucesso é ir de fracasso em fracasso sem perder o entusiasmo.", author: "Churchill", cat: "💪", img: "" }];
         let currentMood = 'all';
         let currentFont = 'font-elegant';
         let currentStyle = 'default';
 
-        // Carregar Frases do Supabase
         async function loadQuotes() {
-            const { data, error } = await _supabase.from('quotes').select('*');
+            const { data } = await _supabase.from('quotes').select('*');
             if (data && data.length > 0) {
                 quotes = data.map(q => ({ text: q.text, author: q.author, cat: q.category, img: q.image_url }));
             }
             rollNew();
         }
 
-        // Salvar Frase no Supabase
         async function saveQuote() {
             const text = document.getElementById('in-text').value;
             const author = document.getElementById('in-author').value;
             const category = document.getElementById('in-cat').value;
             const file = document.getElementById('in-file').files[0];
-            const btn = document.getElementById('btn-save');
-
             if (!text) return showToast("Escreva algo!");
-            btn.disabled = true;
             showToast("Sincronizando...");
-
             try {
                 let image_url = "";
                 if (file) {
                     const fileName = `${Date.now()}_${file.name}`;
-                    const { data: upData, error: upErr } = await _supabase.storage.from('images').upload(fileName, file);
-                    if (upErr) throw upErr;
-                    const { data: pUrl } = _supabase.storage.from('images').getPublicUrl(fileName);
-                    image_url = pUrl.publicUrl;
+                    await _supabase.storage.from('images').upload(fileName, file);
+                    image_url = _supabase.storage.from('images').getPublicUrl(fileName).data.publicUrl;
                 }
-
                 await _supabase.from('quotes').insert([{ text, author, category, image_url }]);
-                showToast("Salvo para todos! ✨");
-                closeModals(true);
-                loadQuotes();
-            } catch (e) {
-                showToast("Erro ao salvar.");
-                console.error(e);
-            } finally {
-                btn.disabled = false;
-            }
+                showToast("Salvo! ✨"); closeModals(true); loadQuotes();
+            } catch (e) { showToast("Erro."); }
         }
 
-        // Lógica de Mood e Troca
         function selectMood(cat) {
             currentMood = cat;
             document.getElementById('mood-modal').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('mood-modal').style.display = 'none';
-                loadQuotes();
-            }, 800);
+            setTimeout(() => { document.getElementById('mood-modal').style.display = 'none'; loadQuotes(); }, 800);
         }
 
         function rollNew() {
             const pool = currentMood === 'all' ? quotes : quotes.filter(q => q.cat === currentMood);
-            const item = pool[Math.floor(Math.random() * pool.length)] || quotes[0];
-            display(item);
+            display(pool[Math.floor(Math.random() * pool.length)] || quotes[0]);
         }
 
         function display(obj) {
             const quoteEl = document.getElementById("quote-display");
             const authorEl = document.getElementById('author-display');
             const bgEl = document.getElementById('dynamic-bg');
+            const focusBtn = document.getElementById('btn-focus-trigger');
             
-            bgEl.style.backgroundImage = obj.img ? `url('${obj.img}')` : 'none';
+            // Gerencia a visibilidade do botão "Ver Arte"
+            if(obj.img) {
+                bgEl.style.backgroundImage = `url('${obj.img}')`;
+                focusBtn.style.display = "block";
+            } else {
+                bgEl.style.backgroundImage = 'none';
+                focusBtn.style.display = "none";
+            }
+            
             authorEl.style.opacity = 0;
-            
-            let text = `"${obj.text}"`;
-            let i = 0;
+            let text = `"${obj.text}"`, i = 0;
             quoteEl.innerHTML = "";
             const timer = setInterval(() => {
                 if(i < text.length) {
@@ -248,16 +248,20 @@
             }, 30);
         }
 
-        // IA Simbolizada
-        function suggestIA() {
-            const aiPhrases = ["A jornada é o prêmio.", "Seja gentil consigo mesmo hoje.", "Grandes coisas levam tempo.", "Respire fundo e recomece."];
-            showToast("IA gerando...");
-            setTimeout(() => {
-                display({ text: aiPhrases[Math.floor(Math.random() * aiPhrases.length)], author: "Daily IA ✨", img: "" });
-            }, 1000);
+        // NOVA FUNÇÃO: Toggles o modo de foco na imagem
+        function toggleFocusMode() {
+            const isFocus = document.body.classList.toggle('focus-mode');
+            if(isFocus) {
+                showToast("Modo Galeria Ativo");
+            }
         }
 
-        // UI Helpers
+        function suggestIA() {
+            const aiPhrases = ["A jornada é o prêmio.", "Seja gentil consigo mesmo hoje.", "Grandes coisas levam tempo.", "Respire fundo."];
+            showToast("IA gerando...");
+            setTimeout(() => display({ text: aiPhrases[Math.floor(Math.random()*aiPhrases.length)], author: "Daily IA ✨", img: "" }), 1000);
+        }
+
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         function toggleMusic() { 
             const a = document.getElementById('bg-music');
@@ -274,10 +278,8 @@
         function copyLink() { navigator.clipboard.writeText(window.location.href); showToast("Link copiado!"); }
         function shareWA() { window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('quote-display').innerText)}`); }
         async function downloadCard() { 
-            const card = document.getElementById('card-export');
-            const logo = document.getElementById('card-logo');
+            const card = document.getElementById('card-export'), logo = document.getElementById('card-logo');
             logo.style.display = "block";
-            showToast("Gerando PNG...");
             const canvas = await html2canvas(card, { scale: 2 });
             const a = document.createElement('a'); a.download = 'daily-muse.png'; a.href = canvas.toDataURL(); a.click();
             logo.style.display = "none";
